@@ -1,0 +1,81 @@
+%% Section 1
+x = LowPass(:, 1); 
+y = LowPass(:, 2); 
+
+x_filtered = x(x <= 1 & x >= 0.5 & y > 0);
+y_filtered = y(x <= 1 & x >= 0.5 & y > 0);
+
+smoothed_y = smooth(x_filtered, y_filtered, 0.05, 'loess'); % Adjust the 0.05 (smoothing parameter) as needed
+
+subplot(2, 1, 1);
+plot(x, y, '-o'); 
+xlabel('X-axis'); 
+ylabel('Y-axis'); 
+title('Smoothed Step Response Measurement'); 
+grid on;
+
+subplot(2, 1, 2);
+plot(x_filtered, smoothed_y, '-o'); 
+xlabel('X-axis'); 
+ylabel('Y-axis'); 
+title('Smoothed Step Response Measurement'); 
+grid on;
+
+[Kv, idx] = max(smoothed_y);
+corresponding_x = x_filtered(idx);
+disp(['Kv: ', num2str(Kv/1000), ' at time: ', num2str(corresponding_x)]);
+yline(Kv, '--r', ['Kv = ', num2str(Kv)]); 
+
+target_63 = 0.6321 * Kv;
+[~, idx_63] = min(abs(smoothed_y - target_63)); 
+Tau_1 = x_filtered(idx_63) - x_filtered(1);
+disp(['1 * Tau: ', num2str(Tau_1)]);
+xline(x_filtered(idx_63), '--b', ['1 * Tau']);
+
+target_86 = 0.8647 * Kv;
+[~, idx_86] = min(abs(smoothed_y - target_86)); 
+Tau_2 = x_filtered(idx_86) - x_filtered(1);
+disp(['2 * Tau: ', num2str(Tau_2)]);
+xline(x_filtered(idx_86), '--b', ['2 * Tau']);
+
+target_95 = 0.9502 * Kv;
+[~, idx_95] = min(abs(smoothed_y - target_95)); 
+Tau_3 = x_filtered(idx_95) - x_filtered(1);
+disp(['3 * Tau: ', num2str(Tau_3)]);
+xline(x_filtered(idx_95), '--b', ['3 * Tau']);
+
+target_98 = 0.9817 * Kv;
+[~, idx_98] = min(abs(smoothed_y - target_98)); 
+Tau_4 = x_filtered(idx_98) - x_filtered(1);
+disp(['4 * Tau: ', num2str(Tau_4)]);
+xline(x_filtered(idx_98), '--b', ['4 * Tau']);
+
+total_time = 1 - x_filtered(1);
+for i = 1:5
+    current_time = x_filtered(1) + (i * total_time) / 5;
+    xline(current_time, '--r', ['t/' num2str(5/i)]);
+end
+hold off; 
+Tau = total_time/5;
+disp(['Tau: ', num2str(Tau)]);
+
+%% Section 2
+Kv = Kv / 1000;
+b = 1/Kv;
+m = Tau*b;
+disp(['Mass m = ', num2str(m), ' Damping Coefficient b = ', num2str(b)]);
+Wn = 9;
+damping_ratio = 0.7;
+
+Kp = 68.121;
+Kd = 0;
+Ki = 0;
+disp(['Kp = ', num2str(Kp), ' Kd = ', num2str(Kd), ' Ki = ', num2str(Ki)]);
+
+R3_1 = ((b+Kd)*Kp - m*Ki)/(b+Kd);
+R3_2 = 0;
+R4_1 = Ki;
+R4_2 = 0;
+
+Ki_max = (b + Kd)*Kp/m;
+disp(['Max Ki value is ', num2str(Ki_max)]);
