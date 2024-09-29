@@ -70,6 +70,7 @@ damping_ratio = 0.7;
 Kp = 68.121;
 Kd = 0;
 Ki = 0;
+Alpha = 0.3;
 disp(['Kp = ', num2str(Kp), ' Kd = ', num2str(Kd), ' Ki = ', num2str(Ki)]);
 
 R3_1 = ((b+Kd)*Kp - m*Ki)/(b+Kd);
